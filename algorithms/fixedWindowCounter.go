@@ -31,11 +31,13 @@ func GetNewFixedWindowCounter(window time.Duration, capacity int64) *FixedCounte
 func (fc *FixedCounter) Allow(ctx context.Context, tenandId, userId string) (bool, error) {
 	now := time.Now().UnixNano()
 
+	window := fc.window.Microseconds()
+
 	redisKey := fmt.Sprintf("%s:%s:%s:%s", constants.KeyRateLimit, constants.AlgorithmFixedWindow, tenandId, userId)
 
 	fwcScript := redis.NewScript(lua.GetFixedWindowCounterScript())
 
-	_, err := fwcScript.Run(ctx, store.Rdb, []string{redisKey}, fc.capacity, fc.window, now, 1).Result()
+	_, err := fwcScript.Run(ctx, store.Rdb, []string{redisKey}, fc.capacity, window, now, 1).Result()
 	if err != nil {
 		fmt.Println("Error calling the fixed window counter script, rejecting the request : ", err)
 		return false, err

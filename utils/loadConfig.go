@@ -8,6 +8,7 @@ import (
 )
 
 type Config struct {
+	Ports      models.Ports       `json:"ports"`
 	Redis      models.RedisConfig `json:"redis"`
 	MaxTokens  float64            `json:"maxTokens"`
 	RefillRate float64            `json:"refillRate"`

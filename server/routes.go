@@ -1,10 +1,18 @@
 package server
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"goapp/handlers"
 
-func (app *Application) SetupRoutes() {
+	"github.com/gofiber/fiber/v2"
+)
+
+func (app *Application) SetupRoutes() *fiber.App {
 	appServer := fiber.New()
 
+	configHandler := handlers.NewConfigHandler(app.config, app.rdb)
+
 	// Defining the routes
-	appServer.Get("")
+	appServer.Get("/api/v1/limiter", configHandler.GetLimiter)
+
+	return appServer
 }

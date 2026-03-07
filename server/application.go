@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"goapp/store"
 	"goapp/utils"
 
@@ -26,4 +27,19 @@ func NewApplication(filePath string) (*Application, error) {
 		config: config,
 		rdb:    rdb,
 	}, nil
+}
+
+func (app *Application) StartServer() error {
+	// Start fiber server
+	app.StartFiberServer()
+
+	return nil
+}
+
+func (app *Application) StartFiberServer()  {
+	appServer := app.SetupRoutes()
+
+	if err := appServer.Listen(app.config.Ports.FiberServer); err != nil {
+		fmt.Println("Error starting fiber server:", err)
+	}
 }

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"goapp/constants"
 	"goapp/lua"
-	"goapp/store"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -28,7 +27,7 @@ func NewFixedWindowCounter(window time.Duration, capacity int64) *FixedCounterRe
 	}
 }
 
-func (fc *FixedCounterRedis) Allow(ctx context.Context, tenandId, userId string) (bool, error) {
+func (fc *FixedCounterRedis) Allow(ctx context.Context, rdb *redis.Client, tenandId, userId string) (bool, error) {
 	now := time.Now().UnixNano()
 
 	window := fc.window.Microseconds()
@@ -37,11 +36,7 @@ func (fc *FixedCounterRedis) Allow(ctx context.Context, tenandId, userId string)
 
 	fwcScript := redis.NewScript(lua.GetFixedWindowCounterScript())
 
-	if store.Rdb == nil {
-		return false, fmt.Errorf("redis client not initialized")
-	}
-
-	_, err := fwcScript.Run(ctx, store.Rdb, []string{redisKey}, fc.capacity, window, now, 1).Result()
+	_, err := fwcScript.Run(ctx, rdb, []string{redisKey}, fc.capacity, window, now, 1).Result()
 	if err != nil {
 		fmt.Println("Error calling the fixed window counter script, rejecting the request : ", err)
 		return false, err

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"goapp/constants"
 	"goapp/lua"
-	"goapp/store"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -28,7 +27,7 @@ func NewTokenBucket(maxTokens, refillRate float64) *TokenBucketRedis {
 	}
 }
 
-func (tb *TokenBucketRedis) Allow(ctx context.Context, tenantId, userId string) (bool, error) {
+func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, tenantId, userId string) (bool, error) {
 	// tokens := &Tokens{}
 
 	// get the information from the redis for the key
@@ -37,13 +36,9 @@ func (tb *TokenBucketRedis) Allow(ctx context.Context, tenantId, userId string) 
 	tokenBucketScript := redis.NewScript(lua.GetTokenBucketScript())
 	now := float64(time.Now().UnixNano()) / 1e9
 
-	if store.Rdb == nil {
-		return false, fmt.Errorf("redis client not initialized")
-	}
-
 	_, err := tokenBucketScript.Run(
 		ctx,
-		store.Rdb,
+		rdb,
 		[]string{redisKey},
 		tb.MaxTokens,
 		tb.RefillRate,

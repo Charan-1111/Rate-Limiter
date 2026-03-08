@@ -7,6 +7,8 @@ import (
 	"goapp/constants"
 	"sync"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type TokenBucketStore struct {
@@ -30,7 +32,7 @@ func NewTokenBucketMem(capacity, fillRate float64) *TokenBucket {
 	}
 }
 
-func (tb *TokenBucket) Allow(ctx context.Context, tenantId, userId string) (bool, error) {
+func (tb *TokenBucket) Allow(ctx context.Context, rdb *redis.Client, tenantId, userId string) (bool, error) {
 	tb.mu.Lock()
 	defer tb.mu.Unlock()
 

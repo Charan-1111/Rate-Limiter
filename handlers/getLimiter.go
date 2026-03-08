@@ -19,6 +19,6 @@ func (cfg *ConfigHandler) GetLimiter(c *fiber.Ctx) error {
 		})
 	}
 
-	logic.GetLimiter(cfg.factory, limiterType, algorithm)
+	logic.GetLimiter(cfg.rdb, cfg.factory, limiterType, algorithm)
 	return nil
 }

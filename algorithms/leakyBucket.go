@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"goapp/constants"
 	"goapp/lua"
-	"goapp/store"
 	"sync"
 	"time"
 
@@ -30,7 +29,7 @@ func NewLeakyBucket(maxTokens, leakRate float64) *LeakyBucketRedis {
 	}
 }
 
-func (lb *LeakyBucketRedis) Allow(ctx context.Context, tenantId, userId string) (bool, error) {
+func (lb *LeakyBucketRedis) Allow(ctx context.Context, rdb *redis.Client, tenantId, userId string) (bool, error) {
 	// read data from redis
 	redisKey := fmt.Sprintf("%s:%s:%s:%s", constants.KeyRateLimit, constants.AlgorithmLeakyBucket, tenantId, userId)
 
@@ -38,11 +37,7 @@ func (lb *LeakyBucketRedis) Allow(ctx context.Context, tenantId, userId string) 
 
 	now := float64(time.Now().UnixNano()) / 1e9
 
-	if store.Rdb == nil {
-		return false, fmt.Errorf("redis client not initialized")
-	}
-
-	_, err := leakyScript.Run(ctx, store.Rdb, []string{redisKey}, lb.MaxTokens, lb.LeakRate, now, 1).Result()
+	_, err := leakyScript.Run(ctx, rdb, []string{redisKey}, lb.MaxTokens, lb.LeakRate, now, 1).Result()
 	if err != nil {
 		fmt.Println("Error running the script, rejecting the request : ", err)
 		return false, err

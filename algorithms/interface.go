@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"goapp/constants"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type RateLimiter interface {
-	Allow(ctx context.Context, tenantId string, userId string) (bool, error)
+	Allow(ctx context.Context, rdb *redis.Client, tenantId string, userId string) (bool, error)
 }
 
 type LimiterFactory interface {

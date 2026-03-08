@@ -6,6 +6,8 @@ import (
 	"goapp/constants"
 	"sync"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type SlidingWindowStore struct {
@@ -30,7 +32,7 @@ func NewSlidingWindowMem(window time.Duration, capacity int) *SlidingWindow {
 	}
 }
 
-func (sw *SlidingWindow) Allow(ctx context.Context, tenantId, userId string) (bool, error) {
+func (sw *SlidingWindow) Allow(ctx context.Context, rdb *redis.Client, tenantId, userId string) (bool, error) {
 	sw.mu.Lock()
 	defer sw.mu.Unlock()
 

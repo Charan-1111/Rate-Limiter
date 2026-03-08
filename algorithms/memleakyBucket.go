@@ -7,6 +7,8 @@ import (
 	"goapp/constants"
 	"sync"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type LeakyBucketStore struct {
@@ -30,7 +32,7 @@ func NewLeakyBucketMem(capacity, leakRate float64) *LeakyBucket {
 	}
 }
 
-func (lb *LeakyBucket) Allow(ctx context.Context, tenantId, userId string) (bool, error) {
+func (lb *LeakyBucket) Allow(ctx context.Context, rdb *redis.Client, tenantId, userId string) (bool, error) {
 	lb.mu.Lock()
 	defer lb.mu.Unlock()
 

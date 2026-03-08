@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"goapp/constants"
 	"goapp/lua"
-	"goapp/store"
 	"sync"
 	"time"
 
@@ -30,7 +29,7 @@ func NewSlidingWindowCounter(window time.Duration, capacity int) *SlidingWindowC
 	}
 }
 
-func (sc *SlidingWindowCounterRedis) Allow(ctx context.Context, tenantId, userId string) (bool, error) {
+func (sc *SlidingWindowCounterRedis) Allow(ctx context.Context, rdb *redis.Client, tenantId, userId string) (bool, error) {
 	now := time.Now().UnixMilli()
 
 	windowMs := sc.window.Milliseconds()
@@ -39,11 +38,7 @@ func (sc *SlidingWindowCounterRedis) Allow(ctx context.Context, tenantId, userId
 
 	swcScript := redis.NewScript(lua.GetSlidingWindowScript())
 
-	if store.Rdb == nil {
-		return false, fmt.Errorf("redis client not initialized")
-	}
-
-	_, err := swcScript.Run(ctx, store.Rdb, []string{redisKey}, sc.capacity, windowMs, now, 1).Result()
+	_, err := swcScript.Run(ctx, rdb, []string{redisKey}, sc.capacity, windowMs, now, 1).Result()
 	if err != nil {
 		fmt.Println("Error calling the sliding window counter script, rejecting the request : ", err)
 		return false, err
@@ -51,4 +46,4 @@ func (sc *SlidingWindowCounterRedis) Allow(ctx context.Context, tenantId, userId
 		fmt.Println("Accepting the request")
 	}
 	return true, nil
-}	
+}

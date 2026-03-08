@@ -6,6 +6,8 @@ import (
 	"goapp/constants"
 	"sync"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type FixedWindowStore struct {
@@ -29,7 +31,7 @@ func NewFixedWindowMem(window time.Duration, capacity int) *FixedWindow {
 	}
 }
 
-func (fw *FixedWindow) Allow(ctx context.Context, tenantId, userId string) (bool, error) {
+func (fw *FixedWindow) Allow(ctx context.Context, rdb *redis.Client, tenantId, userId string) (bool, error) {
 	fw.mu.Lock()
 	defer fw.mu.Unlock()
 

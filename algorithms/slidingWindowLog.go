@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type SlidingWindowLog struct {
@@ -22,7 +24,7 @@ func GetNewSlidingWindowLog(window time.Duration, capacity int64) *SlidingWindow
 	}
 }
 
-func (sl *SlidingWindowLog) Allow(ctx context.Context, key string) (bool, error) {
+func (sl *SlidingWindowLog) Allow(ctx context.Context, rdb *redis.Client, key string) (bool, error) {
 	sl.mu.Lock()
 	defer sl.mu.Unlock()
 

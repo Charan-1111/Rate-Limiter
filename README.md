@@ -1,6 +1,7 @@
 # rateLimiter
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen) ![Version](https://img.shields.io/badge/version-0.1.0-blue)
+
 A simple, extensible rate limiting service written in Go.  It supports multiple algorithms (token bucket, leaky bucket, fixed and sliding windows) and can operate either in‑memory or backed by Redis (with Lua scripts).
 
 ## 🚀 What the project does

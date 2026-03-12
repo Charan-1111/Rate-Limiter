@@ -22,7 +22,12 @@ type SlidingWindowCounterRedis struct {
 	mu       sync.Mutex
 }
 
-func NewSlidingWindowCounter(window time.Duration, capacity int) *SlidingWindowCounterRedis {
+func NewSlidingWindowCounter(windowStr string, capacity int) *SlidingWindowCounterRedis {
+	window, err := time.ParseDuration(windowStr)
+	if err != nil {
+		fmt.Println("Error parsing the duration")
+	}
+
 	return &SlidingWindowCounterRedis{
 		window:   window,
 		capacity: capacity,

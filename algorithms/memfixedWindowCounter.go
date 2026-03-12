@@ -22,7 +22,12 @@ type FixedWindow struct {
 	mu       sync.Mutex
 }
 
-func NewFixedWindowMem(window time.Duration, capacity int) *FixedWindow {
+func NewFixedWindowMem(windowStr string, capacity int) *FixedWindow {
+	window, err := time.ParseDuration(windowStr)
+	if err != nil {
+		fmt.Println("Error parsing the duration")
+	}
+
 	return &FixedWindow{
 		capacity: capacity,
 		window:   window,

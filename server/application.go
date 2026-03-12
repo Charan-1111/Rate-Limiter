@@ -62,6 +62,9 @@ func (app *Application) StartServer() error {
 	// create the tables
 	store.CreateTables(context.Background(), app.db, app.log, app.config.Tables)
 
+	// Load the cache
+	app.cache.LoadCache(context.Background(), app.log, app.db, app.config.Queries.Fetch.FetchPolicies)
+
 	// Start fiber server
 	app.StartFiberServer()
 

@@ -13,6 +13,7 @@ type Config struct {
 	Database   store.Database    `json:"database"`
 	Redis      store.RedisConfig `json:"redis"`
 	Tables     map[string]string `json:"tables"`
+	Queries    models.Queries    `json:"queries"`
 	MaxTokens  float64           `json:"maxTokens"`
 	RefillRate float64           `json:"refillRate"`
 }

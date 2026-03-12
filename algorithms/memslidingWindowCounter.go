@@ -23,7 +23,12 @@ type SlidingWindow struct {
 	mu       sync.Mutex
 }
 
-func NewSlidingWindowMem(window time.Duration, capacity int) *SlidingWindow {
+func NewSlidingWindowMem(windowStr string, capacity int) *SlidingWindow {
+	window, err := time.ParseDuration(windowStr)
+	if err != nil {
+		fmt.Println("Error parsing the duration")
+	}
+
 	return &SlidingWindow{
 		capacity: capacity,
 		window:   window,

@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"goapp/constants"
+	"goapp/services"
 	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
 )
 
 type TokenBucketStore struct {
@@ -32,7 +34,7 @@ func NewTokenBucketMem(capacity, fillRate float64) *TokenBucket {
 	}
 }
 
-func (tb *TokenBucket) Allow(ctx context.Context, rdb *redis.Client, tenantId, userId string) (bool, error) {
+func (tb *TokenBucket) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenantId, userId string) (bool, error) {
 	tb.mu.Lock()
 	defer tb.mu.Unlock()
 

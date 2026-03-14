@@ -12,7 +12,7 @@ import (
 )
 
 type RateLimiter interface {
-	Allow(ctx context.Context, rdb *redis.Client, tenantId string, userId string) (bool, error)
+	Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenantId string, userId string) (bool, error)
 }
 
 type LimiterFactory interface {

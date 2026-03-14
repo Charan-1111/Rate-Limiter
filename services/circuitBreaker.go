@@ -7,7 +7,7 @@ import (
 )
 
 type CircuitBreaker struct {
-	cb *gobreaker.CircuitBreaker
+	Cb *gobreaker.CircuitBreaker
 }
 
 func NewCircuitBreaker() *CircuitBreaker {
@@ -23,6 +23,6 @@ func NewCircuitBreaker() *CircuitBreaker {
 	}
 
 	return &CircuitBreaker{
-		cb: gobreaker.NewCircuitBreaker(settings),
+		Cb: gobreaker.NewCircuitBreaker(settings),
 	}
 }

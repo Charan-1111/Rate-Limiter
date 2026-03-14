@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 	"goapp/algorithms"
+	"goapp/constants"
 	"goapp/logger"
 	"goapp/services"
 	"goapp/store"
 	"goapp/utils"
-
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -27,7 +26,7 @@ type Application struct {
 }
 
 func NewApplication(filePath string) (*Application, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.ContextTimeout)
 	defer cancel()
 
 	// Initiating the log

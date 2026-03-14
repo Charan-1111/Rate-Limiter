@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"goapp/constants"
 	"goapp/lua"
+	"goapp/services"
 	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
 )
 
 type LeakyTokensRedis struct {
@@ -29,7 +31,7 @@ func NewLeakyBucket(maxTokens, leakRate float64) *LeakyBucketRedis {
 	}
 }
 
-func (lb *LeakyBucketRedis) Allow(ctx context.Context, rdb *redis.Client, tenantId, userId string) (bool, error) {
+func (lb *LeakyBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenantId, userId string) (bool, error) {
 	// read data from redis
 	redisKey := fmt.Sprintf("%s:%s:%s:%s", constants.KeyRateLimit, constants.AlgorithmLeakyBucket, tenantId, userId)
 
@@ -37,12 +39,23 @@ func (lb *LeakyBucketRedis) Allow(ctx context.Context, rdb *redis.Client, tenant
 
 	now := float64(time.Now().UnixNano()) / 1e9
 
-	_, err := leakyScript.Run(ctx, rdb, []string{redisKey}, lb.MaxTokens, lb.LeakRate, now, 1).Result()
+	// _, err := leakyScript.Run(ctx, rdb, []string{redisKey}, lb.MaxTokens, lb.LeakRate, now, 1).Result()
+	// if err != nil {
+	// 	fmt.Println("Error running the script, rejecting the request : ", err)
+	// 	return false, err
+	// } else {
+	// 	fmt.Println("request accepted")
+	// }
+
+	_, err := cb.Cb.Execute(func() (any, error) {
+		return leakyScript.Run(ctx, rdb, []string{redisKey}, lb.MaxTokens, lb.LeakRate, now, 1).Result()
+	})
+
 	if err != nil {
-		fmt.Println("Error running the script, rejecting the request : ", err)
+		log.Error().Err(err).Msg("Error running the script, rejecting the request")
 		return false, err
 	} else {
-		fmt.Println("request accepted")
+		log.Info().Msg("Accepting the request")
 	}
 
 	return true, nil

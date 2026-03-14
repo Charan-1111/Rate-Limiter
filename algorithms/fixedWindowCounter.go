@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"goapp/constants"
 	"goapp/lua"
+	"goapp/services"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
 )
 
 type FixedCounterRedisStore struct {
@@ -25,14 +27,14 @@ func NewFixedWindowCounter(windowStr string, capacity int64) *FixedCounterRedis 
 	if err != nil {
 		fmt.Println("Error parsing the duration")
 	}
-	
+
 	return &FixedCounterRedis{
 		window:   window,
 		capacity: capacity,
 	}
 }
 
-func (fc *FixedCounterRedis) Allow(ctx context.Context, rdb *redis.Client, tenandId, userId string) (bool, error) {
+func (fc *FixedCounterRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenandId, userId string) (bool, error) {
 	now := time.Now().UnixNano()
 
 	window := fc.window.Microseconds()
@@ -41,12 +43,24 @@ func (fc *FixedCounterRedis) Allow(ctx context.Context, rdb *redis.Client, tenan
 
 	fwcScript := redis.NewScript(lua.GetFixedWindowCounterScript())
 
-	_, err := fwcScript.Run(ctx, rdb, []string{redisKey}, fc.capacity, window, now, 1).Result()
+	// _, err := fwcScript.Run(ctx, rdb, []string{redisKey}, fc.capacity, window, now, 1).Result()
+	// if err != nil {
+	// 	fmt.Println("Error calling the fixed window counter script, rejecting the request : ", err)
+	// 	return false, err
+	// } else {
+	// 	fmt.Println("Accepting the request")
+	// }
+
+	_, err := cb.Cb.Execute(func() (any, error) {
+		return fwcScript.Run(ctx, rdb, []string{redisKey}, fc.capacity, window, now, 1).Result()
+	})
+
 	if err != nil {
-		fmt.Println("Error calling the fixed window counter script, rejecting the request : ", err)
+		log.Error().Err(err).Msg("Error calling the fixed window couter script, rejecting the request")
 		return false, err
 	} else {
-		fmt.Println("Accepting the request")
+		log.Info().Msg("Accepting the request")
 	}
+
 	return true, nil
 }

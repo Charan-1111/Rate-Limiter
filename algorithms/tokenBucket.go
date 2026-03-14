@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"goapp/constants"
 	"goapp/lua"
+	"goapp/services"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
 )
 
 type TokensRedis struct {
@@ -27,7 +29,7 @@ func NewTokenBucket(maxTokens, refillRate float64) *TokenBucketRedis {
 	}
 }
 
-func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, tenantId, userId string) (bool, error) {
+func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenantId, userId string) (bool, error) {
 	// tokens := &Tokens{}
 
 	// get the information from the redis for the key
@@ -36,21 +38,15 @@ func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, tenant
 	tokenBucketScript := redis.NewScript(lua.GetTokenBucketScript())
 	now := float64(time.Now().UnixNano()) / 1e9
 
-	_, err := tokenBucketScript.Run(
-		ctx,
-		rdb,
-		[]string{redisKey},
-		tb.MaxTokens,
-		tb.RefillRate,
-		now,
-		1,
-	).Result()
+	_, err := cb.Cb.Execute(func() (any, error){
+		return tokenBucketScript.Run(ctx, rdb, []string{redisKey}, tb.MaxTokens, tb.RefillRate, now, 1).Result()
+	})
 
 	if err != nil {
-		fmt.Println("Error running the token bucket script : ", err)
+		log.Error().Err(err).Msg("Error running the token bucket script")
 		return false, err
 	} else {
-		fmt.Println("Accepting the request")
+		log.Info().Msg("Accepting the request")
 	}
 
 	return true, nil

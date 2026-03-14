@@ -18,5 +18,5 @@ func GetLimiter(ctx context.Context, db *pgxpool.Pool, rdb *redis.Client, config
 		fmt.Println("Error getting the limiter : ", err)
 	}
 
-	limiter.Allow(context.Background(), rdb, "tenant1", "user1")
+	limiter.Allow(ctx, rdb, scope, identifier)
 }

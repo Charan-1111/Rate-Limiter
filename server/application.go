@@ -9,6 +9,8 @@ import (
 	"goapp/store"
 	"goapp/utils"
 
+	"time"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
@@ -25,7 +27,8 @@ type Application struct {
 }
 
 func NewApplication(filePath string) (*Application, error) {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	// Initiating the log
 	log := logger.InitLogger()

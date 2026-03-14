@@ -20,6 +20,6 @@ func (cfg *ConfigHandler) GetLimiter(c *fiber.Ctx) error {
 		})
 	}
 
-	logic.GetLimiter(c.Context(), cfg.db, cfg.rdb, cfg.config, cfg.log, cfg.factory, cfg.cache, scope, identifier, rateLimitType)
+	logic.GetLimiter(cfg.ctx, cfg.db, cfg.rdb, cfg.config, cfg.log, cfg.factory, cfg.cache, scope, identifier, rateLimitType)
 	return nil
 }

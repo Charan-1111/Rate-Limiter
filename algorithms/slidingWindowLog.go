@@ -3,10 +3,12 @@ package algorithms
 import (
 	"context"
 	"fmt"
+	"goapp/services"
 	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
 )
 
 type SlidingWindowLog struct {
@@ -24,7 +26,7 @@ func GetNewSlidingWindowLog(window time.Duration, capacity int64) *SlidingWindow
 	}
 }
 
-func (sl *SlidingWindowLog) Allow(ctx context.Context, rdb *redis.Client, key string) (bool, error) {
+func (sl *SlidingWindowLog) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, key string) (bool, error) {
 	sl.mu.Lock()
 	defer sl.mu.Unlock()
 

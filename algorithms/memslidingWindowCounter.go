@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"goapp/constants"
+	"goapp/services"
 	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
 )
 
 type SlidingWindowStore struct {
@@ -37,7 +39,7 @@ func NewSlidingWindowMem(windowStr string, capacity int) *SlidingWindow {
 	}
 }
 
-func (sw *SlidingWindow) Allow(ctx context.Context, rdb *redis.Client, tenantId, userId string) (bool, error) {
+func (sw *SlidingWindow) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenantId, userId string) (bool, error) {
 	sw.mu.Lock()
 	defer sw.mu.Unlock()
 

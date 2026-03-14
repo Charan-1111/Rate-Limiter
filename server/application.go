@@ -23,6 +23,7 @@ type Application struct {
 	rdb     *redis.Client
 	cache   *services.Cache
 	factory algorithms.LimiterFactory
+	cb      *services.CircuitBreaker
 }
 
 func NewApplication(filePath string) (*Application, error) {
@@ -40,7 +41,6 @@ func NewApplication(filePath string) (*Application, error) {
 	}
 
 	// Initialize the database
-
 	db, _ := config.Database.InitDb(context.Background(), log)
 
 	// Initialize Redis
@@ -50,8 +50,10 @@ func NewApplication(filePath string) (*Application, error) {
 	factory := &algorithms.DefaultLimiterFactory{}
 
 	// create the cache variable
-
 	cache := services.NewCache()
+
+	// Initializing circuit breaker
+	cb := services.NewCircuitBreaker()
 
 	return &Application{
 		ctx:     ctx,
@@ -61,6 +63,7 @@ func NewApplication(filePath string) (*Application, error) {
 		rdb:     rdb,
 		cache:   cache,
 		factory: factory,
+		cb:      cb,
 	}, nil
 }
 

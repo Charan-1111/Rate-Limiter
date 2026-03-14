@@ -19,9 +19,10 @@ type ConfigHandler struct {
 	rdb     *redis.Client
 	cache   *services.Cache
 	factory algorithms.LimiterFactory
+	cb      *services.CircuitBreaker
 }
 
-func NewConfigHandler(ctx context.Context, config *utils.Config, log zerolog.Logger, db *pgxpool.Pool, rdb *redis.Client, factory algorithms.LimiterFactory, cache *services.Cache) *ConfigHandler {
+func NewConfigHandler(ctx context.Context, config *utils.Config, log zerolog.Logger, db *pgxpool.Pool, rdb *redis.Client, factory algorithms.LimiterFactory, cache *services.Cache, cb *services.CircuitBreaker) *ConfigHandler {
 	return &ConfigHandler{
 		ctx:     ctx,
 		config:  config,
@@ -30,5 +31,6 @@ func NewConfigHandler(ctx context.Context, config *utils.Config, log zerolog.Log
 		rdb:     rdb,
 		cache:   cache,
 		factory: factory,
+		cb:      cb,
 	}
 }

@@ -10,7 +10,7 @@ import (
 func main() {
 	metrics.InitMetrics()
 
-	filePath := "manifest/config.json"
+	filePath := "deploy/config.json"
 	app, err := server.NewApplication(filePath)
 	if err != nil {
 		log.Error("Errro creating the application, retrying...")

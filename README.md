@@ -66,6 +66,15 @@ curl "http://localhost:8000/api/v1/limiter?scope=api&identifier=user_123&type=me
 
 *Note: Ensure you have populated your `rateLimitPolicies` table in Postgres for the given `scope` and `identifier` prior to making rate-limiting requests.*
 
+## Failure Handling
+
+To ensure high availability and stability, `rateLimiter` implements the Circuit Breaker pattern using [`gobreaker`](https://github.com/sony/gobreaker).
+
+This mechanism protects the application and its downstream dependencies (like Redis or PostgreSQL) from cascading failures. When a dependency experiences consecutive failures beyond a configured threshold (`constants.ConsecutiveFailuresThreshold`), the Circuit Breaker "trips" and opens. 
+- While **Open**, requests are failed fast without overwhelming the struggling service.
+- After a configured `Timeout` (`constants.CircuitBreakerTimeout`), the circuit transitions to a **Half-Open** state, allowing a limited number of test requests (`MaxRequests: 2`) to pass through. 
+- If the test requests succeed, the circuit closes and normal traffic resumes; if they fail, the circuit re-opens.
+
 ## Where users can get help
 
 - Detailed algorithm implementations can be found in the [`algorithms/`](algorithms/) directory.
@@ -76,7 +85,7 @@ If you encounter issues or have questions, please check our Issue Tracker or ope
 
 ## Future Work
 
-See the [Future Work](futureWork.md) document for a list of planned features and enhancements.
+See the [Future Work](future_work.md) document for a list of planned features and enhancements.
 
 ## Who maintains and contributes
 

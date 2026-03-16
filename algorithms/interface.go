@@ -42,7 +42,7 @@ func (m *metricsLimiter) Allow(ctx context.Context, rdb *redis.Client, cb *servi
 }
 
 type LimiterFactory interface {
-	GetLimiter(ctx context.Context, db *pgxpool.Pool, log zerolog.Logger, scope, identifer, rateLimitType, query string, cache *services.Cache) (RateLimiter, error)
+	GetLimiter(ctx context.Context, db *pgxpool.Pool, log zerolog.Logger, scope, identifier, rateLimitType, query string, cache *services.Cache) (RateLimiter, error)
 }
 
 type DefaultLimiterFactory struct{}
@@ -93,7 +93,7 @@ func (f *DefaultLimiterFactory) GetLimiter(ctx context.Context, db *pgxpool.Pool
 
 	// // Implement logic to create and return the appropriate limiter based on the type and algorithm
 	algo, ok := registry[policy.Algorithm]
-	if !ok {
+	if !ok { 
 		return nil, fmt.Errorf("unsupported algorithm: %s", policy.Algorithm)
 	}
 

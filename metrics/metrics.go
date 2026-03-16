@@ -34,3 +34,12 @@ var (
 		},
 	)
 )
+
+func InitMetrics() {
+	prometheus.MustRegister(
+		Requests,
+		RedisLatency,
+		RedisErrors,
+		RedisLatency,
+	)
+}

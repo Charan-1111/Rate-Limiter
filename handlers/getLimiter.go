@@ -20,6 +20,21 @@ func (cfg *ConfigHandler) GetLimiter(c *fiber.Ctx) error {
 		})
 	}
 
-	logic.GetLimiter(cfg.ctx, cfg.db, cfg.rdb, cfg.config, cfg.log, cfg.factory, cfg.cache, cfg.cb, scope, identifier, rateLimitType)
-	return nil
+	allowed, err := logic.GetLimiter(cfg.ctx, cfg.db, cfg.rdb, cfg.config, cfg.log, cfg.factory, cfg.cache, cfg.cb, scope, identifier, rateLimitType)
+	
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Internal server error while evaluating rate limits",
+		})
+	}
+
+	if !allowed {
+		return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
+			"error": "Too Many Requests",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Request allowed",
+	})
 }

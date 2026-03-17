@@ -6,6 +6,7 @@ import (
 	"goapp/constants"
 	"goapp/lua"
 	"goapp/services"
+	"goapp/utils"
 	"sync"
 	"time"
 
@@ -36,12 +37,12 @@ func NewSlidingWindowCounter(windowStr string, capacity int) *SlidingWindowCount
 	}
 }
 
-func (sc *SlidingWindowCounterRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenantId, userId string) (bool, error) {
+func (sc *SlidingWindowCounterRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, scope, identifier string) (bool, error) {
 	now := time.Now().UnixMilli()
 
 	windowMs := sc.window.Milliseconds()
 	// read data from the redis
-	redisKey := fmt.Sprintf("%s:%s:%s:%s", constants.KeyRateLimit, constants.AlgorithmSlidingWindow, tenantId, userId)
+	redisKey := utils.StringBuilder(constants.KeyRateLimit, constants.AlgorithmSlidingWindow, scope, identifier)
 
 	swcScript := redis.NewScript(lua.GetSlidingWindowScript())
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"goapp/constants"
 	"goapp/services"
+	"goapp/utils"
 	"sync"
 	"time"
 
@@ -34,12 +35,12 @@ func NewTokenBucketMem(capacity, fillRate float64) *TokenBucket {
 	}
 }
 
-func (tb *TokenBucket) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenantId, userId string) (bool, error) {
+func (tb *TokenBucket) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, scope, identifier string) (bool, error) {
 	tb.mu.Lock()
 	defer tb.mu.Unlock()
 
 	// make the key
-	key := fmt.Sprintf("%s:%s:%s:%s", constants.KeyRateLimit, constants.AlgorithmTokenBucket, tenantId, userId)
+	key := utils.StringBuilder(constants.KeyRateLimit, constants.AlgorithmTokenBucket, scope, identifier)
 	now := time.Now()
 
 	// Fetch from the cache

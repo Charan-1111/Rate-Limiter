@@ -39,11 +39,11 @@ Building reliable systems requires effective traffic control. `rateLimiter` is u
    {
      "ports": { "fiberServer": ":8000" },
      "database": {
-       "username": "admin",
-       "password": "admin123",
-       "host": "localhost",
-       "port": "5432",
-       "databaseName": "testdb"
+       "username": "<databaseUsername>",
+       "password": "<databasePassword>",
+       "host": "<databaseHost>",
+       "port": "<databasePort>",
+       "databaseName": "<databaseName>"
      },
      "redis": { "host": "localhost", "port": "6379" }
    }

@@ -61,19 +61,15 @@ func (aw *AsyncWriter) run() {
 	}
 }
 
-var (
-	asyncWriter  *AsyncWriter
-)
 
-func InitLogger() zerolog.Logger {
-	asyncWriter = NewAsyncWriter(os.Stdout, 1024)
+
+func InitLogger() (zerolog.Logger, func()) {
+	asyncWriter := NewAsyncWriter(os.Stdout, 1024)
 	log := zerolog.New(asyncWriter).With().Timestamp().Logger()
 
-	return log
-}
-
-func CloseLogger() {
-	if asyncWriter != nil {
+	closer := func() {
 		asyncWriter.Close()
 	}
+
+	return log, closer
 }

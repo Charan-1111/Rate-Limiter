@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"goapp/constants"
 	"goapp/services"
+	"goapp/utils"
 	"sync"
 	"time"
 
@@ -39,11 +40,11 @@ func NewSlidingWindowMem(windowStr string, capacity int) *SlidingWindow {
 	}
 }
 
-func (sw *SlidingWindow) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenantId, userId string) (bool, error) {
+func (sw *SlidingWindow) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, scope, identifier string) (bool, error) {
 	sw.mu.Lock()
 	defer sw.mu.Unlock()
 
-	key := fmt.Sprintf("%s:%s:%s:%s", constants.KeyRateLimit, constants.AlgorithmSlidingWindow, tenantId, userId)
+	key := utils.StringBuilder(constants.KeyRateLimit, constants.AlgorithmSlidingWindow, scope, identifier)
 	now := time.Now()
 
 	// fetch the data from the cache

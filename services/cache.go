@@ -44,20 +44,17 @@ func (c *Cache) LoadCache(ctx context.Context, log zerolog.Logger, db *pgxpool.P
 func (c *Cache) GetPolicy(ctx context.Context, db *pgxpool.Pool, log zerolog.Logger, scope, identifier, query string) (*PolicySchema, bool) {
 	cacheKey := scope + ":" + identifier
 
-	policy, exists := c.data.Get(cacheKey)
-
-	if !exists {
-		// Fetch from the database
-		policy, exists = FetchPolicyByKey(ctx, db, log, query, cacheKey)
-		// store in the cache
-		if exists {
-			// Double-check locking to avoid overwriting if another goroutine fetched it concurrently
-			if existingPolicy, ok := c.data.Get(cacheKey); ok {
-				policy = existingPolicy
-			} else {
-				c.data.SetWithTTL(cacheKey, policy, 1, constants.PolicyCacheDuration)
-			}
+	if val, found := c.data.Get(cacheKey); found {
+		if cachedPolicy, ok := val.(*PolicySchema); ok {
+			return cachedPolicy, true
 		}
 	}
-	return policy.(*PolicySchema), exists
+
+	dbPolicy, exists := FetchPolicyByKey(ctx, db, log, query, cacheKey)
+	if exists && dbPolicy != nil {
+		c.data.SetWithTTL(cacheKey, dbPolicy, 1, constants.PolicyCacheDuration)
+		return dbPolicy, true
+	}
+
+	return nil, false
 }

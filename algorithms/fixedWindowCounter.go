@@ -6,6 +6,7 @@ import (
 	"goapp/constants"
 	"goapp/lua"
 	"goapp/services"
+	"goapp/utils"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -34,12 +35,12 @@ func NewFixedWindowCounter(windowStr string, capacity int64) *FixedCounterRedis 
 	}
 }
 
-func (fc *FixedCounterRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenantId, userId string) (bool, error) {
+func (fc *FixedCounterRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, scope, identifier string) (bool, error) {
 	now := time.Now().UnixNano()
 
 	window := fc.window.Microseconds()
 
-	redisKey := fmt.Sprintf("%s:%s:%s:%s", constants.KeyRateLimit, constants.AlgorithmFixedWindow, tenantId, userId)
+	redisKey := utils.StringBuilder(constants.KeyRateLimit, constants.AlgorithmFixedWindow, scope, identifier)
 
 	fwcScript := redis.NewScript(lua.GetFixedWindowCounterScript())
 

@@ -2,10 +2,10 @@ package algorithms
 
 import (
 	"context"
-	"fmt"
 	"goapp/constants"
 	"goapp/lua"
 	"goapp/services"
+	"goapp/utils"
 	"sync"
 	"time"
 
@@ -31,9 +31,9 @@ func NewLeakyBucket(maxTokens, leakRate float64) *LeakyBucketRedis {
 	}
 }
 
-func (lb *LeakyBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenantId, userId string) (bool, error) {
+func (lb *LeakyBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, scope, identifier string) (bool, error) {
 	// read data from redis
-	redisKey := fmt.Sprintf("%s:%s:%s:%s", constants.KeyRateLimit, constants.AlgorithmLeakyBucket, tenantId, userId)
+	redisKey := utils.StringBuilder(constants.KeyRateLimit, constants.AlgorithmLeakyBucket, scope, identifier)
 
 	leakyScript := redis.NewScript(lua.GetLeakyBucketScript())
 

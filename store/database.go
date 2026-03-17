@@ -29,7 +29,7 @@ func (dbCreds *Database) InitDb(ctx context.Context, log zerolog.Logger) (*pgxpo
 
 		dbConfig, err := pgxpool.ParseConfig(databaseUrl)
 		if err != nil {
-			err = fmt.Errorf("Error while initiating the database pool : %v", err)
+			err = fmt.Errorf("Error while initiating the database pool : %w", err)
 			return
 		}
 

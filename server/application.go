@@ -102,6 +102,10 @@ func (app *Application) StartFiberServer() {
 		app.log.Error().Err(err).Msg("Error starting fiber server")
 	case <-quit:
 		app.log.Info().Msg("Graceful shutdown initiated")
-
+		// gracefully shutting down every dependencies
+		appServer.Shutdown()
+		app.db.Close()
+		app.rdb.Close()
+		logger.CloseLogger()
 	}
 }

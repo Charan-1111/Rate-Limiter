@@ -2,10 +2,10 @@ package algorithms
 
 import (
 	"context"
-	"fmt"
 	"goapp/constants"
 	"goapp/lua"
 	"goapp/services"
+	"goapp/utils"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -29,16 +29,16 @@ func NewTokenBucket(maxTokens, refillRate float64) *TokenBucketRedis {
 	}
 }
 
-func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenantId, userId string) (bool, error) {
+func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, scope, identifier string) (bool, error) {
 	// tokens := &Tokens{}
 
 	// get the information from the redis for the key
-	redisKey := fmt.Sprintf("%s:%s:%s:%s", constants.KeyRateLimit, constants.AlgorithmTokenBucket, tenantId, userId)
+	redisKey := utils.StringBuilder(constants.KeyRateLimit, constants.AlgorithmTokenBucket, scope, identifier)
 
 	tokenBucketScript := redis.NewScript(lua.GetTokenBucketScript())
 	now := float64(time.Now().UnixNano()) / 1e9
 
-	_, err := cb.Cb.Execute(func() (any, error){
+	_, err := cb.Cb.Execute(func() (any, error) {
 		return tokenBucketScript.Run(ctx, rdb, []string{redisKey}, tb.MaxTokens, tb.RefillRate, now, 1).Result()
 	})
 

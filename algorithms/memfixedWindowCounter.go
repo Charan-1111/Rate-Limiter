@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"goapp/constants"
 	"goapp/services"
+	"goapp/utils"
 	"sync"
 	"time"
 
@@ -38,11 +39,11 @@ func NewFixedWindowMem(windowStr string, capacity int) *FixedWindow {
 	}
 }
 
-func (fw *FixedWindow) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, tenantId, userId string) (bool, error) {
+func (fw *FixedWindow) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, scope, identifier string) (bool, error) {
 	fw.mu.Lock()
 	defer fw.mu.Unlock()
 
-	key := fmt.Sprintf("%s:%s:%s:%s", constants.KeyRateLimit, constants.AlgorithmFixedWindow, tenantId, userId)
+	key := utils.StringBuilder(constants.KeyRateLimit, constants.AlgorithmFixedWindow, scope, identifier)
 	now := time.Now()
 
 	currentWindowIdx := int(now.UnixNano() / int64(fw.window))

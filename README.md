@@ -2,7 +2,7 @@
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen) ![Version](https://img.shields.io/badge/version-0.1.0-blue) ![Go Version](https://img.shields.io/badge/go-1.25+-blue.svg)
 
-A flexible, scalable, and extensible rate limiting service written in Go.
+A production-grade, high-performance rate limiting service written in Go, designed for both low-latency in-memory execution and distributed environments using Redis.
 
 ## What the project does
 

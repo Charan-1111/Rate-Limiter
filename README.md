@@ -75,6 +75,13 @@ This mechanism protects the application and its downstream dependencies (like Re
 - After a configured `Timeout` (`constants.CircuitBreakerTimeout`), the circuit transitions to a **Half-Open** state, allowing a limited number of test requests (`MaxRequests: 2`) to pass through. 
 - If the test requests succeed, the circuit closes and normal traffic resumes; if they fail, the circuit re-opens.
 
+## Failure Scenarios
+
+- Redis down → fallback to in-memory (eventual inconsistency)
+- PostgreSQL down → cached policies still work
+- Cache miss storm → controlled via Ristretto
+- Circuit breaker open → fail fast
+
 ## Where users can get help
 
 - Detailed algorithm implementations can be found in the [`algorithms/`](algorithms/) directory.

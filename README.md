@@ -90,7 +90,7 @@ This mechanism protects the application and its downstream dependencies (like Re
 
 If you encounter issues or have questions, please check our Issue Tracker or open a new issue.
 
-## Trade-offs and Architecture
+## Architecture and Trade-offs
 
 ![Architecture Diagram](documentation/Architecture.png)
 

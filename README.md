@@ -93,6 +93,38 @@ When configuring and using `rateLimiter`, consider the following architectural c
 - **Latency vs Consistency (Algorithms)**: Using the local in-memory store for algorithms offers ultra-low, sub-millisecond latency but sacrifices strict global consistency in a distributed, multi-instance deployment. Conversely, using Redis algorithms ensures strict global consistency across all application instances but introduces network latency for every rate-limit evaluation.
 - **Policy Engine Caching**: To dynamically fetch rate limit configurations without hammering the PostgreSQL database, `rateLimiter` aggressively caches the database `PolicySchemas` locally in memory using [**Dgraph's Ristretto**](https://github.com/dgraph-io/ristretto). *Note: Ristretto is strictly used to cache the database rules, it does not store the algorithmic request counters.* Read our deep-dive on [Why We Chose Ristretto](documentation/ristretto.md) for more details on resolving lock-contention, TTL management, and TinyLFU eviction rules!
 
+## Performance Benchmarks
+
+The following benchmarks illustrate the Max RPS and latency parameters of the different rate limiting algorithms when stored purely in-memory vs using Redis. For more details, refer to the raw benchmarks in the [`benchmarkReports/`](benchmarkReports/) folder.
+
+### Fixed Window Counter
+
+| Backend      | Max RPS | P95 Latency | P99 Latency |
+|--------------|---------|-------------|-------------|
+| In-Memory    | 3,518   | 78.1 ms     | 173.3 ms    |
+| Redis        | 1,011   | 232.5 ms    | 352.9 ms    |
+
+### Leaky Bucket
+
+| Backend      | Max RPS | P95 Latency | P99 Latency |
+|--------------|---------|-------------|-------------|
+| In-Memory    | 22,328  | 10.6 ms     | 55.4 ms     |
+| Redis        | 1,376   | 182.2 ms    | 245.0 ms    |
+
+### Sliding Window Counter
+
+| Backend      | Max RPS | P95 Latency | P99 Latency |
+|--------------|---------|-------------|-------------|
+| In-Memory    | 970     | 216.3 ms    | 342.4 ms    |
+| Redis        | 777     | 331.4 ms    | 474.5 ms    |
+
+### Token Bucket
+
+| Backend      | Max RPS | P95 Latency | P99 Latency |
+|--------------|---------|-------------|-------------|
+| In-Memory    | 4,029   | 68.6 ms     | 130.0 ms    |
+| Redis        | 930     | 271.5 ms    | 432.8 ms    |
+
 ## Future Work
 
 See the [Future Work](documentation/futureWork.md) document for a list of planned features and enhancements.

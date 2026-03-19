@@ -104,6 +104,8 @@ When configuring and using `rateLimiter`, consider the following architectural c
 
 The following benchmarks illustrate the Max RPS and latency parameters of the different rate limiting algorithms when stored purely in-memory vs using Redis. **These benchmarks were conducted with 10,000 total requests and 100 concurrent users.** For more details, refer to the raw benchmarks in the [`benchmarkReports/`](benchmarkReports/) folder.
 
+**Tests executed using k6 on a local machine (8 CPU, 16GB RAM)**
+
 ### Fixed Window Counter
 
 | Backend      | Max RPS | P95 Latency | P99 Latency |

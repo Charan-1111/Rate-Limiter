@@ -10,7 +10,9 @@ A flexible, scalable, and extensible rate limiting service written in Go.
 
 ## Why the project is useful
 
-Building reliable systems requires effective traffic control. `rateLimiter` is useful because it offers:
+Modern distributed systems must handle unpredictable traffic spikes, abuse, and multi-tenant fairness. 
+
+`rateLimiter` is designed to simulate production-grade rate limiting systems used in various organisations — focusing on scalability, fault tolerance, and extensibility. Rate limiting offers
 
 - **Multiple Algorithms**: Supports Token Bucket, Leaky Bucket, Fixed Window Counter, and Sliding Window Counter out of the box.
 - **Pluggable Storage Backends**: Choose between ultra-fast in-memory processing or robust distributed coordination via Redis.

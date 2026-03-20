@@ -4,6 +4,7 @@ import (
 	"context"
 	"goapp/constants"
 	"goapp/lua"
+	"goapp/models"
 	"goapp/services"
 	"goapp/utils"
 	"time"
@@ -29,7 +30,7 @@ func NewTokenBucket(maxTokens, refillRate float64) *TokenBucketRedis {
 	}
 }
 
-func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, scope, identifier string) (*LimiterResponse, error) {
+func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, scope, identifier string) (*models.LimiterResponse, error) {
 	// get the information from the redis for the key
 	redisKey := utils.StringBuilder(constants.KeyRateLimit, constants.AlgorithmTokenBucket, scope, identifier)
 
@@ -46,9 +47,9 @@ func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *se
 
 	if err != nil {
 		log.Error().Err(err).Msg("Error running the token bucket script")
-		return &LimiterResponse{
-			Allowed: false,
-			RetryAfter: 0,
+		return &models.LimiterResponse{
+			Allowed:       false,
+			RetryAfter:    0,
 			CurrentTokens: 0,
 		}, err
 	} else {
@@ -57,7 +58,7 @@ func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *se
 
 	retryAfter := now + (tb.MaxTokens-float64(currentTokens))/tb.RefillRate
 
-	return &LimiterResponse{
+	return &models.LimiterResponse{
 		Allowed:       allowed,
 		RetryAfter:    int64(retryAfter),
 		CurrentTokens: currentTokens,

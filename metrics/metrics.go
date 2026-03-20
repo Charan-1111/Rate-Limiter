@@ -38,7 +38,7 @@ var (
 func InitMetrics() {
 	prometheus.MustRegister(
 		Requests,
-		RedisLatency,
+		RequestsLatency,
 		RedisErrors,
 		RedisLatency,
 	)

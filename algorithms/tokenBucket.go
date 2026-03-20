@@ -29,25 +29,37 @@ func NewTokenBucket(maxTokens, refillRate float64) *TokenBucketRedis {
 	}
 }
 
-func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, scope, identifier string) (bool, error) {
-	// tokens := &Tokens{}
-
+func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *services.CircuitBreaker, log zerolog.Logger, scope, identifier string) (*LimiterResponse, error) {
 	// get the information from the redis for the key
 	redisKey := utils.StringBuilder(constants.KeyRateLimit, constants.AlgorithmTokenBucket, scope, identifier)
 
 	tokenBucketScript := redis.NewScript(lua.GetTokenBucketScript())
 	now := float64(time.Now().UnixNano()) / 1e9
 
-	_, err := cb.Cb.Execute(func() (any, error) {
-		return tokenBucketScript.Run(ctx, rdb, []string{redisKey}, tb.MaxTokens, tb.RefillRate, now, 1).Result()
+	results, err := cb.Cb.Execute(func() (any, error) {
+		results, err := tokenBucketScript.Run(ctx, rdb, []string{redisKey}, tb.MaxTokens, tb.RefillRate, now, 1).Result()
+		return results, err
 	})
+
+	allowed := results.([]any)[0].(bool)
+	currentTokens := results.([]any)[1].(int64)
 
 	if err != nil {
 		log.Error().Err(err).Msg("Error running the token bucket script")
-		return false, err
+		return &LimiterResponse{
+			Allowed: false,
+			RetryAfter: 0,
+			CurrentTokens: 0,
+		}, err
 	} else {
 		log.Info().Msg("Accepting the request")
 	}
 
-	return true, nil
+	retryAfter := now + (tb.MaxTokens-float64(currentTokens))/tb.RefillRate
+
+	return &LimiterResponse{
+		Allowed:       allowed,
+		RetryAfter:    int64(retryAfter),
+		CurrentTokens: currentTokens,
+	}, nil
 }

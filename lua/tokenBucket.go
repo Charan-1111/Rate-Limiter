@@ -25,14 +25,10 @@ func GetTokenBucketScript() string {
 	tokens = math.min(tokens, capacity)
 
 	local allowed = 0
-	local retry_after = 0
 
 	if tokens >= requested then
 		tokens = tokens - requested
 		allowed = 1
-	else
-		local deficit = requested - allowed
-		retry_after = deficit / refill_rate
 	end
 
 	-- Save state
@@ -42,7 +38,7 @@ func GetTokenBucketScript() string {
 	local ttl = math.ceil((capacity / refill_rate) * 2)
 	redis.call("EXPIRE", key, ttl)
 
-	return {allowed, tokens, retry_after}
+	return {allowed, tokens}
 	`
 
 	return tokenScript

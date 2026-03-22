@@ -64,6 +64,24 @@ The server exposes a main rate-limiting validation endpoint `/api/v1/limiter`. Y
 curl "http://localhost:8000/api/v1/limiter?scope=api&identifier=user_123&type=memory"
 ```
 
+**Example Response (200 OK):**
+```json
+{
+  "message": "Request allowed",
+  "retryAfter": 0,
+  "currentTokens": 99
+}
+```
+
+**Example Response (429 Too Many Requests):**
+```json
+{
+  "error": "Too Many Requests",
+  "retryAfter": 60,
+  "currentTokens": 0
+}
+```
+
 *Note: Ensure you have populated your `rateLimitPolicies` table in Postgres for the given `scope` and `identifier` prior to making rate-limiting requests.*
 
 ## Failure Handling

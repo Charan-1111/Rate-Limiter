@@ -5,7 +5,7 @@ type Ports struct {
 }
 
 type LimiterResponse struct {
-	Allowed       bool
-	RetryAfter    int64
-	CurrentTokens int64
+	Allowed       bool  `json:"allowed"`
+	RetryAfter    int64 `json:"retryAfter"`
+	CurrentTokens int64 `json:"remaining"`
 }

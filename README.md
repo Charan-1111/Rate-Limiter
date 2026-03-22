@@ -69,7 +69,7 @@ curl "http://localhost:8000/api/v1/limiter?scope=api&identifier=user_123&type=me
 {
   "message": "Request allowed",
   "retryAfter": 0,
-  "currentTokens": 99
+  "remaining": 99
 }
 ```
 
@@ -78,7 +78,7 @@ curl "http://localhost:8000/api/v1/limiter?scope=api&identifier=user_123&type=me
 {
   "error": "Too Many Requests",
   "retryAfter": 60,
-  "currentTokens": 0
+  "remaining": 0
 }
 ```
 

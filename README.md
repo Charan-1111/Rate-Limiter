@@ -6,7 +6,7 @@ A production-grade, high-performance rate limiting service written in Go, design
 
 ## What the project does
 
-`rateLimiter` is a high-performance HTTP service that provides rate limiting capabilities. It exposes an API endpoint to evaluate limits based on dynamic policies. It features multiple rate limiting algorithms (like token bucket and sliding window) which can execute entirely in-memory for minimal latency, or use Redis with Lua scripts for distributed environments. The application utilizes the Fiber web framework, PostgreSQL for policy configuration, and provides a customizable plugin-based architecture.
+`rateLimiter` is a high-performance HTTP service that provides rate limiting capabilities. It exposes an API endpoint to evaluate limits based on dynamic policies. It features multiple rate limiting algorithms (like token bucket and sliding window) which can execute entirely in-memory for ultra-low latency, or use Redis with Lua scripts for distributed environments. The application utilizes the Fiber web framework, PostgreSQL for policy configuration, and provides a customizable plugin-based architecture.
 
 ## Why the project is useful
 

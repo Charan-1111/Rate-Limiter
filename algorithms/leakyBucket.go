@@ -55,7 +55,8 @@ func (lb *LeakyBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *se
 		return &models.LimiterResponse{
 			Allowed:       false,
 			RetryAfter:    0,
-			CurrentTokens: 0,
+			RemainingTokens: 0,
+			TotalTokens : int64(lb.MaxTokens),
 		}, err
 	} else {
 		log.Info().Msg("Accepting the request")
@@ -64,6 +65,7 @@ func (lb *LeakyBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *se
 	return &models.LimiterResponse{
 		Allowed:       allowed,
 		RetryAfter:    int64(retryAfter),
-		CurrentTokens: int64(currentTokens),
+		RemainingTokens: int64(currentTokens),
+		TotalTokens : int64(lb.MaxTokens),
 	}, nil
 }

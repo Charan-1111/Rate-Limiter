@@ -50,7 +50,8 @@ func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *se
 		return &models.LimiterResponse{
 			Allowed:       false,
 			RetryAfter:    0,
-			CurrentTokens: 0,
+			RemainingTokens: 0,
+			TotalTokens : int64(tb.MaxTokens),
 		}, err
 	} else {
 		log.Info().Msg("Accepting the request")
@@ -61,6 +62,7 @@ func (tb *TokenBucketRedis) Allow(ctx context.Context, rdb *redis.Client, cb *se
 	return &models.LimiterResponse{
 		Allowed:       allowed,
 		RetryAfter:    int64(retryAfter),
-		CurrentTokens: currentTokens,
+		RemainingTokens: currentTokens,
+		TotalTokens : int64(tb.MaxTokens),
 	}, nil
 }

@@ -67,9 +67,10 @@ func (tb *TokenBucket) Allow(ctx context.Context, rdb *redis.Client, cb *service
 	if tokenStore.tokens == 0 {
 		fmt.Println("Request is getting rejected, bucket is empty")
 		return &models.LimiterResponse{
-			Allowed:       false,
-			RetryAfter:    0,
-			CurrentTokens: int64(tokenStore.tokens),
+			Allowed:         false,
+			RetryAfter:      0,
+			RemainingTokens: int64(tokenStore.tokens),
+			TotalTokens:     int64(tb.capacity),
 		}, errors.New("Request is getting rejected")
 	}
 
@@ -79,8 +80,9 @@ func (tb *TokenBucket) Allow(ctx context.Context, rdb *redis.Client, cb *service
 	tb.tokens[key] = tokenStore
 
 	return &models.LimiterResponse{
-		Allowed:       true,
-		RetryAfter:    0,
-		CurrentTokens: int64(tokenStore.tokens),
+		Allowed:         true,
+		RetryAfter:      0,
+		RemainingTokens: int64(tokenStore.tokens),
+		TotalTokens:     int64(tb.capacity),
 	}, nil
 }

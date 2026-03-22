@@ -60,7 +60,8 @@ func (fc *FixedCounterRedis) Allow(ctx context.Context, rdb *redis.Client, cb *s
 		return &models.LimiterResponse{
 			Allowed:       false,
 			RetryAfter:    int64(retryAfter),
-			CurrentTokens: int64(tokens),
+			RemainingTokens: int64(tokens),
+			TotalTokens : fc.capacity,
 		}, err
 	} else {
 		log.Info().Msg("Accepting the request")
@@ -69,6 +70,7 @@ func (fc *FixedCounterRedis) Allow(ctx context.Context, rdb *redis.Client, cb *s
 	return &models.LimiterResponse{
 		Allowed:       allowed,
 		RetryAfter:    int64(retryAfter),
-		CurrentTokens: int64(tokens),
+		RemainingTokens: int64(tokens),
+		TotalTokens : fc.capacity,
 	}, nil
 }

@@ -68,9 +68,10 @@ func (fw *FixedWindow) Allow(ctx context.Context, rdb *redis.Client, cb *service
 	if tokenStore.tokens <= 0 {
 		fmt.Println("Request is rejected")
 		return &models.LimiterResponse{
-			Allowed:       false,
-			RetryAfter:    0,
-			CurrentTokens: int64(tokenStore.tokens),
+			Allowed:         false,
+			RetryAfter:      0,
+			RemainingTokens: int64(tokenStore.tokens),
+			TotalTokens:     int64(fw.capacity),
 		}, nil
 	}
 
@@ -81,8 +82,9 @@ func (fw *FixedWindow) Allow(ctx context.Context, rdb *redis.Client, cb *service
 	fw.tokens[key] = tokenStore
 
 	return &models.LimiterResponse{
-		Allowed:       true,
-		RetryAfter:    0,
-		CurrentTokens: int64(tokenStore.tokens),
+		Allowed:         true,
+		RetryAfter:      0,
+		RemainingTokens: int64(tokenStore.tokens),
+		TotalTokens:     int64(fw.capacity),
 	}, nil
 }

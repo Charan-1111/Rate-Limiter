@@ -82,9 +82,10 @@ func (sw *SlidingWindow) Allow(ctx context.Context, rdb *redis.Client, cb *servi
 	if effectiveCnt >= float64(sw.capacity) {
 		fmt.Println("Request is rejected")
 		return &models.LimiterResponse{
-			Allowed:       false,
-			RetryAfter:    0,
-			CurrentTokens: int64(tokens.currentCnt),
+			Allowed:         false,
+			RetryAfter:      0,
+			RemainingTokens: int64(tokens.currentCnt),
+			TotalTokens:     int64(sw.capacity),
 		}, nil
 	}
 
@@ -94,8 +95,9 @@ func (sw *SlidingWindow) Allow(ctx context.Context, rdb *redis.Client, cb *servi
 	// store the information in the cache
 	sw.tokens[key] = tokens
 	return &models.LimiterResponse{
-		Allowed:       true,
-		RetryAfter:    0,
-		CurrentTokens: int64(tokens.currentCnt),
+		Allowed:         true,
+		RetryAfter:      0,
+		RemainingTokens: int64(tokens.currentCnt),
+		TotalTokens:     int64(sw.capacity),
 	}, nil
 }

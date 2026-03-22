@@ -65,9 +65,10 @@ func (lb *LeakyBucket) Allow(ctx context.Context, rdb *redis.Client, cb *service
 	if tokenStore.tokens >= lb.capacity {
 		fmt.Println("request is getting rejected")
 		return &models.LimiterResponse{
-			Allowed:       false,
-			RetryAfter:    0,
-			CurrentTokens: int64(tokenStore.tokens),
+			Allowed:         false,
+			RetryAfter:      0,
+			RemainingTokens: int64(tokenStore.tokens),
+			TotalTokens:     int64(lb.capacity),
 		}, errors.New("Request is getting rejected")
 	}
 
@@ -77,8 +78,9 @@ func (lb *LeakyBucket) Allow(ctx context.Context, rdb *redis.Client, cb *service
 	lb.tokens[key] = tokenStore
 
 	return &models.LimiterResponse{
-		Allowed:       true,
-		RetryAfter:    0,
-		CurrentTokens: int64(tokenStore.tokens),
+		Allowed:         true,
+		RetryAfter:      0,
+		RemainingTokens: int64(tokenStore.tokens),
+		TotalTokens:     int64(lb.capacity),
 	}, nil
 }

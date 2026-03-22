@@ -82,6 +82,14 @@ curl "http://localhost:8000/api/v1/limiter?scope=api&identifier=user_123&type=me
 }
 ```
 
+### Response Headers
+
+Every rate limit response will also include standard HTTP headers to give the client visibility into their current rate-limit standing:
+
+- `X-RateLimit-Limit`: The total number of requests permitted in the given configuration.
+- `X-RateLimit-Remaining`: The number of requests left for the current window.
+- `X-RateLimit-Retry-After`: The time in seconds to wait before making a new request (returns 0 if not rate limited).
+
 *Note: Ensure you have populated your `rateLimitPolicies` table in Postgres for the given `scope` and `identifier` prior to making rate-limiting requests.*
 
 ## Failure Handling

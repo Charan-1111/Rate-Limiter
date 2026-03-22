@@ -63,7 +63,8 @@ func (sc *SlidingWindowCounterRedis) Allow(ctx context.Context, rdb *redis.Clien
 		return &models.LimiterResponse{
 			Allowed:       false,
 			RetryAfter:    int64(retryAfter),
-			CurrentTokens: int64(tokens),
+			RemainingTokens: int64(tokens),
+			TotalTokens : int64(sc.capacity),
 		}, err
 	} else {
 		log.Info().Msg("Accepting the request")
@@ -71,6 +72,7 @@ func (sc *SlidingWindowCounterRedis) Allow(ctx context.Context, rdb *redis.Clien
 	return &models.LimiterResponse{
 		Allowed:       allowed,
 		RetryAfter:    int64(retryAfter),
-		CurrentTokens: int64(tokens),
+		RemainingTokens: int64(tokens),
+		TotalTokens : int64(sc.capacity),
 	}, nil
 }

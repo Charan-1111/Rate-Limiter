@@ -112,6 +112,8 @@ If you encounter issues or have questions, please check our Issue Tracker or ope
 
 ![Architecture Diagram](documentation/Architecture.jpeg)
 
+The service is horizontally scalable, with multiple instances coordinating via Redis for consistent rate limiting across distributed environments.
+
 When configuring and using `rateLimiter`, consider the following architectural choices based on the algorithms and storage backends:
 
 - **Accuracy vs Memory**: Storing exact timestamps for every request (e.g., Sliding Window Log) provides 100% accuracy but consumes significantly more memory. Counter-based approaches (e.g., Sliding Window Counter or Token Bucket) approximate the rate and are highly memory-efficient, making them better suited for high-throughput scenarios.

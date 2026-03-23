@@ -17,5 +17,9 @@ func (app *Application) SetupRoutes() *fiber.App {
 	appServer.Get("/api/v1/limiter", configHandler.GetLimiter)
 
 	appServer.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
+
+	appServer.Get("/health", func(c *fiber.Ctx) error {
+		return c.SendStatus(fiber.StatusOK)
+	})
 	return appServer
 }

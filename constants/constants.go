@@ -24,6 +24,7 @@ const (
 
 	// Timeouts
 	ContextTimeout               = 5 * time.Second
+	RequestTimeout               = 2 * time.Second
 	CircuitBreakerInterval       = 10 * time.Second
 	CircuitBreakerTimeout        = 30 * time.Second
 	ConsecutiveFailuresThreshold = 5

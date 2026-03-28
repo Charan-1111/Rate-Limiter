@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"goapp/constants"
 	"goapp/logic"
 	"goapp/logger"
@@ -23,7 +24,12 @@ func (cfg *ConfigHandler) GetLimiter(c *fiber.Ctx) error {
 	}
 
 	reqLog := logger.GetRequestLogger(c, cfg.log)
-	allowed, err := logic.GetLimiter(cfg.ctx, cfg.db, cfg.rdb, cfg.config, reqLog, cfg.factory, cfg.cache, cfg.cb, scope, identifier, rateLimitType)
+	
+	// Create a timeout-bounded context for the request
+	ctx, cancel := context.WithTimeout(c.Context(), constants.RequestTimeout)
+	defer cancel()
+
+	allowed, err := logic.GetLimiter(ctx, cfg.db, cfg.rdb, cfg.config, reqLog, cfg.factory, cfg.cache, cfg.cb, scope, identifier, rateLimitType)
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

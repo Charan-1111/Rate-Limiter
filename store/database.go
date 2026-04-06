@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"fmt"
+	"goapp/models"
 	"sync"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -20,7 +21,12 @@ type Database struct {
 	once         sync.Once
 }
 
-func (dbCreds *Database) InitDb(ctx context.Context, log zerolog.Logger) (*pgxpool.Pool, error) {
+type Db struct {
+	Db      *pgxpool.Pool
+	Queries models.Queries
+}
+
+func (dbCreds *Database) InitDb(ctx context.Context, log zerolog.Logger, queries models.Queries) (*Db, error) {
 	var pool *pgxpool.Pool
 	var err error
 
@@ -52,12 +58,18 @@ func (dbCreds *Database) InitDb(ctx context.Context, log zerolog.Logger) (*pgxpo
 		return nil, fmt.Errorf("Database connection ping failed : %w", err)
 	}
 
-	return pool, err
+
+
+	return &Db{
+		Db:      pool,
+		Queries: queries,
+	}, err
 }
 
-func CreateTables(ctx context.Context, db *pgxpool.Pool, log zerolog.Logger, tables map[string]string) {
+func (db *Db) CreateTables(ctx context.Context, log zerolog.Logger, tables map[string]string) {
+	// TODO : Need to migrate this logic to the repository functions
 	for tableName, createQuery := range tables {
-		_, err := db.Exec(ctx, createQuery)
+		_, err := db.Db.Exec(ctx, createQuery)
 
 		if err != nil {
 			log.Info().Err(err).Msg("Error creating table : " + tableName)

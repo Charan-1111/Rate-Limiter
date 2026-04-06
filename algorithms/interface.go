@@ -7,6 +7,7 @@ import (
 	"goapp/metrics"
 	"goapp/models"
 	"goapp/services"
+	"goapp/store"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -43,7 +44,7 @@ func (m *metricsLimiter) Allow(ctx context.Context, rdb *redis.Client, cb *servi
 }
 
 type LimiterFactory interface {
-	GetLimiter(ctx context.Context, db *pgxpool.Pool, log zerolog.Logger, scope, identifier, rateLimitType, query string, cache *services.Cache) (RateLimiter, error)
+	GetLimiter(ctx context.Context, db *store.Db, log zerolog.Logger, scope, identifier, rateLimitType, query string, cache *services.Cache) (RateLimiter, error)
 }
 
 type DefaultLimiterFactory struct{}

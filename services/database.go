@@ -2,15 +2,15 @@ package services
 
 import (
 	"context"
+	"goapp/store"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
 )
 
-func FetchPolicies(ctx context.Context, db *pgxpool.Pool, log zerolog.Logger, query string) map[string]*PolicySchema {
+func FetchPolicies(ctx context.Context, db *store.Db, log zerolog.Logger, query string) map[string]*PolicySchema {
 	data := make(map[string]*PolicySchema)
 
-	rows, err := db.Query(ctx, query)
+	rows, err := db.Db.Query(ctx, query)
 	if err != nil {
 		log.Error().Err(err).Msg("Error fetching policies from the database")
 	}
@@ -31,10 +31,9 @@ func FetchPolicies(ctx context.Context, db *pgxpool.Pool, log zerolog.Logger, qu
 	return data
 }
 
-
-func FetchPolicyByKey(ctx context.Context, db *pgxpool.Pool, log zerolog.Logger, query, cacheKey string) (*PolicySchema, bool) {
+func FetchPolicyByKey(ctx context.Context, db *store.Db, log zerolog.Logger, query, cacheKey string) (*PolicySchema, bool) {
 	var policy *PolicySchema
-	err := db.QueryRow(ctx, query, cacheKey).Scan(&policy)
+	err := db.Db.QueryRow(ctx, query, cacheKey).Scan(&policy)
 	if err != nil {
 		log.Error().Err(err).Msg("Error fetching policy by key from the database")
 		return nil, false

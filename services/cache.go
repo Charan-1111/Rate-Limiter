@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 	"goapp/constants"
+	"goapp/store"
 
 	"github.com/dgraph-io/ristretto"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
 )
 
@@ -33,7 +33,7 @@ func NewCache() *Cache {
 	}
 }
 
-func (c *Cache) LoadCache(ctx context.Context, log zerolog.Logger, db *pgxpool.Pool, query string) {
+func (c *Cache) LoadCache(ctx context.Context, log zerolog.Logger, db *store.Db, query string) {
 	policies := FetchPolicies(ctx, db, log, query)
 
 	for policyKey, policy := range policies {
@@ -41,7 +41,7 @@ func (c *Cache) LoadCache(ctx context.Context, log zerolog.Logger, db *pgxpool.P
 	}
 }
 
-func (c *Cache) GetPolicy(ctx context.Context, db *pgxpool.Pool, log zerolog.Logger, scope, identifier, query string) (*PolicySchema, bool) {
+func (c *Cache) GetPolicy(ctx context.Context, db *store.Db, log zerolog.Logger, scope, identifier, query string) (*PolicySchema, bool) {
 	cacheKey := scope + ":" + identifier
 
 	if val, found := c.data.Get(cacheKey); found {

@@ -12,7 +12,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
 )
@@ -22,7 +21,7 @@ type Application struct {
 	cancel    context.CancelFunc
 	config    *utils.Config
 	log       zerolog.Logger
-	db        *pgxpool.Pool
+	db        *store.Db
 	rdb       *redis.Client
 	cache     *services.Cache
 	factory   algorithms.LimiterFactory
@@ -45,7 +44,7 @@ func NewApplication(filePath string) (*Application, error) {
 	}
 
 	// Initialize the database
-	db, _ := config.Database.InitDb(context.Background(), log)
+	db, _ := config.Database.InitDb(context.Background(), log, config.Queries)
 
 	// Initialize Redis
 	rdb := store.InitRedis(&config.Redis, log)
@@ -78,7 +77,7 @@ func (app *Application) StartServer() error {
 	defer initCancel()
 
 	// create the tables
-	store.CreateTables(initCtx, app.db, app.log, app.config.Tables)
+	app.db.CreateTables(initCtx, app.log, app.config.Tables)
 
 	// Load the cache
 	app.cache.LoadCache(initCtx, app.log, app.db, app.config.Queries.Fetch.FetchPolicies)
@@ -112,7 +111,7 @@ func (app *Application) StartFiberServer() {
 		// gracefully shutting down every dependencies
 		app.cancel()
 		appServer.Shutdown()
-		app.db.Close()
+		app.db.Db.Close()
 		app.rdb.Close()
 		app.logCloser()
 	}
